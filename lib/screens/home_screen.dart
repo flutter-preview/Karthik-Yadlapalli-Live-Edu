@@ -1,4 +1,4 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers
+// ignore_for_file: no_leading_underscores_for_local_identifiers, prefer_final_fields
 
 import 'package:flutter/material.dart';
 import 'package:live_edu/app_constants/edu_Icons.dart';
@@ -18,7 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-   List<Widget> _pages =[HomePage(), QuizPage(), HistoryPage(), ProfilePage(),];
+   List<Widget> _pages =const [HomePage(), QuizPage(), HistoryPage(), ProfilePage(),];
 
     int _selectedIndex = 0;
 
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: const Color(0xFFBFC3FC),
         unselectedItemColor: Colors.black,
         items: const [
-        BottomNavigationBarItem(icon: Icon(EduIcons.home,weight: 700,),label: 'Home',),
+        BottomNavigationBarItem(icon: Icon(EduIcons.home,),label: 'Home',),
         BottomNavigationBarItem(icon: Icon(Icons.checklist),label: 'Quizes',),
         BottomNavigationBarItem(icon: Icon(Icons.history),label: 'history',),
         BottomNavigationBarItem(icon: Icon(Icons.person_outlined),label: 'profile',),
