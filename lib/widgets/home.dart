@@ -21,7 +21,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Flexible(
-          flex: 4,
+          flex: 5,
           child: SizedBox(
             child: Padding(
               padding: const EdgeInsets.only(left:16.0 , top: 10.0),
@@ -110,10 +110,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
-                    padding:  EdgeInsets.symmetric(horizontal:8.0,vertical: 6),
+                    padding:  EdgeInsets.symmetric(horizontal:8.0,vertical: 16),
                     child: Text("Topics to study",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700),),
                   ),
                   Expanded(child: ListView.builder(
+                    padding: EdgeInsets.zero,
                     itemCount: topicsManager.courseTopics.length,
                     itemBuilder: (ctx, index){return Padding(
                       padding: const EdgeInsets.only(bottom:10.0 , right: 10.0),

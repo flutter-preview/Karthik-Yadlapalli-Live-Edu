@@ -18,7 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-   List<Widget> _pages =const [HomePage(), QuizPage(), HistoryPage(), ProfilePage(),];
+   List<Widget> _pages = const [HomePage(), QuizPage(), HistoryPage(), ProfilePage(),];
 
     int _selectedIndex = 0;
 

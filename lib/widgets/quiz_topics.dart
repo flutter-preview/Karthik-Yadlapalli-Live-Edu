@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart' ;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../providers/course_provider.dart';
 
 class QuizPage extends ConsumerStatefulWidget {
@@ -23,6 +22,7 @@ class _QuizPageState extends ConsumerState<QuizPage> {
         child: Text("Quiz Topics",style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),),
       ),
       Expanded(child: ListView.builder(
+        padding: EdgeInsets.zero,
         itemCount: topicsManager.courseTopics.length,
         itemBuilder: (ctx , index){
         return Padding(
