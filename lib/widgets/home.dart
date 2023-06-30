@@ -21,7 +21,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Flexible(
-          flex: 5,
+          flex: 4, 
+          fit: FlexFit.tight,
           child: SizedBox(
             child: Padding(
               padding: const EdgeInsets.only(left:16.0 , top: 10.0),
@@ -44,7 +45,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         padding: const EdgeInsets.all(8.0),
                         child: Stack(
                           children: [
-                            Image.asset(courseManager.courses[index].imgThumbnail,height: 180, width: 180,),
+                            Image.asset(courseManager.courses[index].imgThumbnail,height:180, width: 180,),
                             Positioned(
                               top: 10, 
                               left: 10,
@@ -102,7 +103,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
         ),
         Flexible(
-          flex: 5,
+          flex: 4,
           child: SizedBox(
             child: Padding(
               padding: const EdgeInsets.only(left:16.0),
