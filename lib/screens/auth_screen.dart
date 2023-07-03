@@ -1,11 +1,13 @@
-// ignore_for_file: prefer_final_fields
 
+// ignore_for_file: unrelated_type_equality_checks, use_build_context_synchronously
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:live_edu/app_constants/edu_Icons.dart';
 import 'package:live_edu/app_constants/edu_colors.dart';
 import '../utils/page_button.dart';
-import 'guide_screen.dart';
 import 'home_screen.dart'; 
 
 enum AuthMode{login , signUp}
@@ -19,16 +21,76 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
-
   var _authMode = AuthMode.login;
 
+  //*
+  var _enterdemail = '';
+  var _enterdPassword = '';
+
+    //*Controllers
+  final TextEditingController phoneCtrl=TextEditingController();
+  final TextEditingController emailCtrl=TextEditingController();
+  final TextEditingController passwordCtrl=TextEditingController();
+  final TextEditingController nameCtrl =TextEditingController();
+
+  //*FocusNodes 
+  final _emailFocusNode = FocusNode();
+  final _phoneFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+
+  bool hidePassword = true;
+
+
+ //*Login user
+  void _login() async{
+
+    //*loading indicator
+    showDialog(context: context, builder: (context){
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    });
+//*liging user in
+    await FirebaseAuth.instance.signInWithEmailAndPassword(email: _enterdemail, password: _enterdPassword);
+
+    //* poping out the loading indicator once we  have user credentials
+    Navigator.of(context).pop();
+
+  }
+
+
+  //*Register or create a new user
+  void _createUser() async{
+   try {
+  final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+    email: _enterdemail,
+    password: _enterdPassword,
+  );
+} on FirebaseAuthException catch (e) {
+  if (e.code == 'weak-password') {
+    print('The password provided is too weak.');
+  } else if (e.code == 'email-already-in-use') {
+    print('The account already exists for that email.');
+  }
+} catch (e) {
+  print(e);
+}
+ }
+
+
+//*Saving form
    void _saveForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      if(_authMode == AuthMode.login){
+        _login();
+      }else{
+        _createUser();
+      }
     }
   }
+ 
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,16 +100,19 @@ class _AuthScreenState extends State<AuthScreen> {
         children: [
           _authMode == AuthMode.signUp ?
            Padding(
-            padding:  EdgeInsets.only(left:18.0,top: 8),
+            padding:  const EdgeInsets.only(left:18.0,top: 8),
             child: GestureDetector(
               onTap: () {
+                // emailCtrl.clear();
+                // passwordCtrl.clear();
+                _formKey.currentState?.reset();
                 _authMode = AuthMode.login; 
                 setState(() {
                 });
               },
-              child: Icon(EduIcons.back,size: 30,)),
+              child: const Icon(EduIcons.back,size: 30,)),
           ) : const SizedBox(),
-        SizedBox(height: MediaQuery.of(context).size.height*0.09),
+        SizedBox(height: _authMode == AuthMode.login ? MediaQuery.of(context).size.height*0.09 : MediaQuery.of(context).size.height*0.04 ),
          Expanded(
            child: SizedBox(
             child: SingleChildScrollView(
@@ -77,28 +142,48 @@ class _AuthScreenState extends State<AuthScreen> {
                    SizedBox(height: MediaQuery.of(context).size.height*0.05),
                    Padding(
               padding: const EdgeInsets.symmetric(horizontal:20.0),
+
+              //*Form with TextFormFields
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    _authMode == AuthMode.signUp ? Padding(
+                    _authMode == AuthMode.signUp ? 
+                    //*Name Field
+                    Padding(
                       padding: const EdgeInsets.only(bottom:20.0),
                       child: TextFormField(
-                    
+                        controller: nameCtrl,
+                        onFieldSubmitted: (_) {
+                          FocusScope.of(context).requestFocus(_emailFocusNode);
+                        },
                         decoration: InputDecoration(
                           fillColor: const Color(0xFFBFC3FC).withOpacity(0.3),
                           hoverColor: const Color(0xFFA2C3FC),
                           hintText: 'Name',
-                          
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20)
                           )
                         ),
                       ),
-                    ) : SizedBox(),
-                     _authMode == AuthMode.signUp ? Padding(
+                    ) : const SizedBox(),
+
+                    //*Email Field
+                     Padding(
                         padding: const EdgeInsets.only(bottom:20.0),
                        child: TextFormField(
+                        initialValue: _enterdemail,
+                        onSaved: (newValue) {
+                          _enterdemail = newValue!;
+                        },
+                        // controller: emailCtrl,
+                        focusNode: _emailFocusNode, 
+                        onFieldSubmitted: _authMode == AuthMode.login ?  (_) {
+                          FocusScope.of(context).requestFocus(_passwordFocusNode);
+                        } :(_) { 
+                          FocusScope.of(context).requestFocus(_phoneFocusNode);
+                          
+                        },
                        validator: (value) {
               if (value == null || value.isEmpty) {
                 return "Please enter an email";
@@ -117,32 +202,53 @@ class _AuthScreenState extends State<AuthScreen> {
                             borderRadius: BorderRadius.circular(20)
                           )
                         ),
-                            
                                        ),
-                     ) : SizedBox(),
+                     ),
             
+                    _authMode == AuthMode.signUp ?  
+
+                    //*Phone number Field
                     Padding(
                     padding: const EdgeInsets.only(bottom:20.0),
                       child: TextFormField(
-                        validator: (value) {
-                          
+                        focusNode: _phoneFocusNode, 
+                        onFieldSubmitted: (_) { 
+                          FocusScope.of(context).requestFocus(_passwordFocusNode);
                         },
+                        
+                        // validator: (value) {
+                        //   if(value == null || value.isEmpty){
+                        //     return "Please Enter phone number";
+                        //   }else if(value != num){
+                        //     return "Please Enter valid phone number";
+                        //   }
+                        //   return null; //Return null if number is valid 
+                        // },
                         keyboardType: TextInputType.phone,
+                        controller: phoneCtrl,
                         decoration: InputDecoration(
                           
                           fillColor: const Color(0xFFBFC3FC).withOpacity(0.3),
                           hoverColor: const Color(0xFFA2C3FC),
                           hintText: 'Phone',
-                          
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20)
                           )
                         ),
                             
                       ),
-                    ),
-                   
+                    ) : const SizedBox(),
+
+                   //*Password Field
                      TextFormField(
+                      initialValue: _enterdPassword,
+                      onSaved: (newValue) {
+                        _enterdPassword = newValue!;
+                      },
+                      // controller: passwordCtrl,
+                      focusNode: _passwordFocusNode,
+                     
+                      obscureText: _authMode == AuthMode.login ? hidePassword : false ,
                       validator: (value) {
                 if (value == null || value.isEmpty) {
                   return "Please enter a password";
@@ -151,11 +257,17 @@ class _AuthScreenState extends State<AuthScreen> {
                 }
                 return null; // Return null if the password is valid
               },
-              
                       decoration: InputDecoration(
                         fillColor: const Color(0xFFBFC3FC).withOpacity(0.3),
                         hoverColor: const Color(0xFFA2C3FC),
                         hintText: 'Password',
+                        suffixIcon: _authMode == AuthMode.login ? GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              hidePassword = !hidePassword;
+                            });
+                          },
+                          child: hidePassword ? const Icon(Icons.visibility_off) : const Icon(Icons.visibility) ) : null,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20)
                         )
@@ -168,25 +280,28 @@ class _AuthScreenState extends State<AuthScreen> {
                  ),
          ),
         Center(child: PageButton(buttonTap: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => HomeScreen()));
+          _saveForm();
+          // Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => HomeScreen()));
         },buttonText: _authMode == AuthMode.login ? 'Login' : 'Create',),),
         _authMode == AuthMode.login ?
         Padding(
           padding: const EdgeInsets.only(top:8.0,bottom: 8.0),
           child: Center(child: RichText(
     text: TextSpan(
-      text: 'Don\'t have an account?', style: TextStyle(color: Colors.black, fontSize: 18),children: <TextSpan>[
-  TextSpan(text: ' Sign up', style: TextStyle(color: Colors.blueAccent, fontSize: 18),recognizer: TapGestureRecognizer(
+      text: 'Don\'t have an account?', style: const TextStyle(color: Colors.black, fontSize: 18),children: <TextSpan>[
+  TextSpan(text: ' Sign up', style: const TextStyle(color: Colors.blueAccent, fontSize: 18),recognizer: TapGestureRecognizer(
 
   )..onTap =() {
+    // emailCtrl.clear();
+    // passwordCtrl.clear();
+     _formKey.currentState?.reset();
     _authMode = AuthMode.signUp;
     setState(() {
     });
-    // Navigator.of(context).push(MaterialPageRoute(builder: (context)=>GuideScreen()));
   }
       )
 ]),
-        ))) : SizedBox(height: 12,)
+        ))) : const SizedBox(height: 12,)
       ],)),
     );
   }

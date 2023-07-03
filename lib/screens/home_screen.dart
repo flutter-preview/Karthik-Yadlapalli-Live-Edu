@@ -10,7 +10,7 @@ import 'package:live_edu/widgets/quiz_topics.dart';
 import '../widgets/history.dart'; 
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+ const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -27,6 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
          _selectedIndex = index;
       });
     } 
+
+    
 
 
   @override
@@ -60,7 +62,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(width: 5), 
                const  Padding(padding: EdgeInsets.only(top: 5),child:Text('400'),),
                  const SizedBox(width: 16,), 
-                const Icon(EduIcons.notifaction)
+                GestureDetector(
+                  onTap: () {
+                    
+                  },
+                  child: const Icon(EduIcons.notifaction))
               ],
             ),
           ),

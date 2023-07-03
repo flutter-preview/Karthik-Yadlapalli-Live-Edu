@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_edu/widgets/auth_page.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../app_constants/edu_colors.dart';
@@ -43,7 +44,7 @@ class GuideScreen extends StatelessWidget {
                   SizedBox(height: MediaQuery.of(context).size.height*0.05,),
                     Center(
                       child: PageButton(buttonText: 'Next', buttonTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AuthScreen() ));
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AuthPage() ));
                       },),
                     )
                 ],

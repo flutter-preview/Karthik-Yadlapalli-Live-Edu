@@ -1,7 +1,6 @@
 
 // ignore_for_file: use_key_in_widget_constructors
 
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,12 +75,12 @@ class HistoryPage extends ConsumerWidget {
           const SizedBox(height: 18,),
           Container(
             alignment: Alignment.centerLeft,
-            padding: EdgeInsets.only(left: 18),
+            padding: const EdgeInsets.only(left: 18),
             
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Text("Recently Viewed",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700)),
+              const Text("Recently Viewed",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700)),
               SizedBox(
                 height: 250,
                 child: ListView.builder(
@@ -113,9 +112,7 @@ class HistoryPage extends ConsumerWidget {
                                 Text(courseManager.courses[index].rating.toString(),style: TextStyle(color: Colors.grey[500])),
                               ],
                             )),
-                            
                             ))
-                      
                       ]),
                     ),
                     Padding(
@@ -149,7 +146,6 @@ class HistoryPage extends ConsumerWidget {
               )
             ]),
             )
-         
         ],
       ),
     );
@@ -164,21 +160,16 @@ class HistoryPage extends ConsumerWidget {
       minY: 0,
       baselineY: 0,
       // alignment: BarChartAlignment.spaceBetween,
+      titlesData: FlTitlesData(topTitles: AxisTitles(), rightTitles: AxisTitles()),
       gridData: FlGridData(
         show: false
       ),
         borderData: FlBorderData(
           show: false,
-            border: const Border(
-          top: BorderSide.none,
-          right: BorderSide.none,
-          left: BorderSide.none,
-          bottom: BorderSide.none,
-        )),
+           ),
         groupsSpace: 20,
         barGroups: [
             BarChartGroupData(x: 1, 
-           
             barRods: [
             BarChartRodData(fromY: 0, toY: 10, width: 15, color: const Color(0xFFA2C3FC)),
           ]),

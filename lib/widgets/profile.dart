@@ -1,8 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart' ;
 import 'package:live_edu/app_constants/edu_Icons.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
+
+  void logout(){
+    FirebaseAuth.instance.signOut();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +54,17 @@ class ProfilePage extends StatelessWidget {
             child: const Icon(EduIcons.support,color: Colors.black,size: 30,)),
           title: const Text('Support',style: TextStyle(fontSize: 20),),
         ),
+         GestureDetector(
+          onTap: logout,
+           child: ListTile(
+            leading: Container(
+              height: 50, 
+              width: 50,
+             decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color:const Color(0xFFBFC3FC).withOpacity(0.3)),
+              child: const Icon(Icons.logout_rounded,color: Colors.black,size: 30,)),
+            title: const Text('Logout',style: TextStyle(fontSize: 20),),
+                 ),
+         ),
        
       ],),
     );
