@@ -41,8 +41,48 @@ class _AuthScreenState extends State<AuthScreen> {
   bool hidePassword = true;
 
 
- //*Login user
+  //*snackbar
+  void showSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Center(child: Text(message, style: const TextStyle(color: Colors.red),)),
+      backgroundColor: Colors.white,
+      behavior: SnackBarBehavior.floating,
+      dismissDirection: DismissDirection.none,
+      elevation: 20,
+      duration: const Duration(milliseconds: 2000),
+      
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+
+  //*Login user
   void _login() async{
+    //*loading indicator
+    showDialog(context: context, builder: (context){
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    });
+
+    //*loging user in
+  try{
+    await FirebaseAuth.instance.signInWithEmailAndPassword(email: _enterdemail, password: _enterdPassword);
+  } on FirebaseAuthException catch(e){
+   Navigator.of(context).pop();
+  if(e.code == 'user-not-found'){
+  return showSnackBar(context, 'No user found for that email');
+  } else if (e.code == 'wrong-password') {
+    return showSnackBar(context, 'Incorrect password');
+    }
+  }
+    //* poping out the loading indicator once we  have user credentials
+    Navigator.of(context).pop();
+  }
+
+
+  //*Register or create a new user
+  void _createUser() async{
 
     //*loading indicator
     showDialog(context: context, builder: (context){
@@ -50,31 +90,27 @@ class _AuthScreenState extends State<AuthScreen> {
         child: CircularProgressIndicator(),
       );
     });
-//*liging user in
-    await FirebaseAuth.instance.signInWithEmailAndPassword(email: _enterdemail, password: _enterdPassword);
-
-    //* poping out the loading indicator once we  have user credentials
-    Navigator.of(context).pop();
-
-  }
 
 
-  //*Register or create a new user
-  void _createUser() async{
+  //*creating a new user
    try {
   final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
     email: _enterdemail,
     password: _enterdPassword,
   );
 } on FirebaseAuthException catch (e) {
+  Navigator.of(context).pop();
   if (e.code == 'weak-password') {
-    print('The password provided is too weak.');
+     return showSnackBar(context, 'Password is too weak');
   } else if (e.code == 'email-already-in-use') {
-    print('The account already exists for that email.');
+    return showSnackBar(context, 'Email is already registerd, login with password');
   }
 } catch (e) {
-  print(e);
+ return showSnackBar(context, '$e');
 }
+
+//* poping out the loading indicator once we  have user credentials
+    Navigator.of(context).pop();
  }
 
 
@@ -103,8 +139,8 @@ class _AuthScreenState extends State<AuthScreen> {
             padding:  const EdgeInsets.only(left:18.0,top: 8),
             child: GestureDetector(
               onTap: () {
-                // emailCtrl.clear();
-                // passwordCtrl.clear();
+                emailCtrl.clear();
+                passwordCtrl.clear();
                 _formKey.currentState?.reset();
                 _authMode = AuthMode.login; 
                 setState(() {
@@ -170,29 +206,28 @@ class _AuthScreenState extends State<AuthScreen> {
 
                     //*Email Field
                      Padding(
-                        padding: const EdgeInsets.only(bottom:20.0),
+                      padding: const EdgeInsets.only(bottom:20.0),
                        child: TextFormField(
-                        initialValue: _enterdemail,
-                        onSaved: (newValue) {
-                          _enterdemail = newValue!;
-                        },
-                        // controller: emailCtrl,
-                        focusNode: _emailFocusNode, 
+                        controller: emailCtrl,
                         onFieldSubmitted: _authMode == AuthMode.login ?  (_) {
                           FocusScope.of(context).requestFocus(_passwordFocusNode);
                         } :(_) { 
                           FocusScope.of(context).requestFocus(_phoneFocusNode);
-                          
                         },
+                         onSaved: (newValue) {
+                          _enterdemail = newValue!;
+                        },
+                        // initialValue: _enterdemail,
+                        focusNode: _emailFocusNode, 
                        validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "Please enter an email";
-              } else if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
-                return "Please enter a valid email";
-              }
-              return null; // Return null if the email is valid
-            },
-            keyboardType: TextInputType.emailAddress,
+                        if (value == null || value.isEmpty) {
+                          return "Please enter an email";
+                        } else if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
+                          return "Please enter a valid email";
+                          }
+                          return null; // Return null if the email is valid
+                      },
+                        keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           fillColor: const Color(0xFFBFC3FC).withOpacity(0.3),
                           hoverColor: const Color(0xFFA2C3FC),
@@ -204,30 +239,28 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                                        ),
                      ),
-            
+
                     _authMode == AuthMode.signUp ?  
 
                     //*Phone number Field
                     Padding(
                     padding: const EdgeInsets.only(bottom:20.0),
                       child: TextFormField(
+                        controller: phoneCtrl,
                         focusNode: _phoneFocusNode, 
                         onFieldSubmitted: (_) { 
                           FocusScope.of(context).requestFocus(_passwordFocusNode);
                         },
-                        
-                        // validator: (value) {
-                        //   if(value == null || value.isEmpty){
-                        //     return "Please Enter phone number";
-                        //   }else if(value != num){
-                        //     return "Please Enter valid phone number";
-                        //   }
-                        //   return null; //Return null if number is valid 
-                        // },
+                        validator: (value) {
+                          if(value == null || value.isEmpty){
+                            return "Please Enter phone number";
+                          }else if(value.length != 10){
+                            return "Please Enter valid phone number";
+                          }
+                          return null; //Return null if number is valid 
+                        },
                         keyboardType: TextInputType.phone,
-                        controller: phoneCtrl,
                         decoration: InputDecoration(
-                          
                           fillColor: const Color(0xFFBFC3FC).withOpacity(0.3),
                           hoverColor: const Color(0xFFA2C3FC),
                           hintText: 'Phone',
@@ -235,28 +268,26 @@ class _AuthScreenState extends State<AuthScreen> {
                             borderRadius: BorderRadius.circular(20)
                           )
                         ),
-                            
                       ),
                     ) : const SizedBox(),
 
                    //*Password Field
                      TextFormField(
-                      initialValue: _enterdPassword,
+                      controller: passwordCtrl,
+                      focusNode: _passwordFocusNode,
+                      // initialValue: _enterdPassword,
                       onSaved: (newValue) {
                         _enterdPassword = newValue!;
                       },
-                      // controller: passwordCtrl,
-                      focusNode: _passwordFocusNode,
-                     
-                      obscureText: _authMode == AuthMode.login ? hidePassword : false ,
                       validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Please enter a password";
-                } else if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$%^&*])[A-Za-z\d!@#\$%^&*]{8,}$').hasMatch(value)) {
-                  return "Please enter a valid password";
-                }
-                return null; // Return null if the password is valid
-              },
+                        if (value == null || value.isEmpty) {
+                          return "Please enter a password";
+                        } else if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$%^&*])[A-Za-z\d!@#\$%^&*]{8,}$').hasMatch(value)) {
+                          return "Please enter a valid password";
+                          }
+                          return null; // Return null if the password is valid
+                      },
+                      obscureText: _authMode == AuthMode.login ? hidePassword : false,
                       decoration: InputDecoration(
                         fillColor: const Color(0xFFBFC3FC).withOpacity(0.3),
                         hoverColor: const Color(0xFFA2C3FC),
@@ -292,8 +323,8 @@ class _AuthScreenState extends State<AuthScreen> {
   TextSpan(text: ' Sign up', style: const TextStyle(color: Colors.blueAccent, fontSize: 18),recognizer: TapGestureRecognizer(
 
   )..onTap =() {
-    // emailCtrl.clear();
-    // passwordCtrl.clear();
+    emailCtrl.clear();
+    passwordCtrl.clear();
      _formKey.currentState?.reset();
     _authMode = AuthMode.signUp;
     setState(() {
